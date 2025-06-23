@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Изменнеия для PULLREquest
 // ЗАПУСК РАСЧЁТА ЧЕРЕЗ ТЕЛО POST ЗАПРОСА В JSON ФОРМАТЕ (НЕОБХОДИМО ПЕРЕДАТЬ СРЕЗ {"values": [1, 4, 3, 6]})
 type Numbers struct {
 	Values []float64 `json:"values"` // Свзяь с JSON
