@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -14,22 +14,27 @@ type SumResponse struct {
 	Sum float64 `json:"sum"`
 }
 
-// ввод в формате {"values": [1, 6, 3, 6]}
+//ФОРМАТ ВВОДА {"values": [1, 4, 3, 6]}
+
 func PostHandler(w http.ResponseWriter, r *http.Request) {
+	logger := slog.Default()
+
 	if r.Method != http.MethodPost {
-		statusCode := http.StatusMethodNotAllowed
-		responseBody := "Only POST method is supported"
-		log.Printf("Error %d: %s", statusCode, responseBody)
-		http.Error(w, responseBody, statusCode)
+		logger.Warn("Unsupported HTTP method",
+			"method", r.Method,
+			"remote_addr", r.RemoteAddr,
+		)
+		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var nums Numbers
 	if err := json.NewDecoder(r.Body).Decode(&nums); err != nil {
-		statusCode := http.StatusBadRequest
-		responseBody := "Invalid data format"
-		log.Printf("Error %d: %s, decode error: %v", statusCode, responseBody, err)
-		http.Error(w, responseBody, statusCode)
+		logger.Warn("JSON decode error",
+			"error", err,
+			"remote_addr", r.RemoteAddr,
+		)
+		http.Error(w, "Invalid data format", http.StatusBadRequest)
 		return
 	}
 
@@ -38,23 +43,19 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		sum += v
 	}
 
+	logger.Info("Sum calculated",
+		"values", nums.Values,
+		"sum", sum,
+		"remote_addr", r.RemoteAddr,
+	)
+
 	resp := SumResponse{Sum: sum}
-
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		statusCode := http.StatusInternalServerError
-		responseBody := "Failed to encode response"
-		log.Printf("Error %d: %s, encode error: %v", statusCode, responseBody, err)
-		http.Error(w, responseBody, statusCode)
-		return
-	}
+	json.NewEncoder(w).Encode(resp)
 }
 
 func main() {
 	http.HandleFunc("/post", PostHandler)
-	log.Println("Server started at :8080")
-	log.Fatal(http.ListenAndServe("localhost:8080", nil))
-
+	slog.Info("Server started on localhost:8080")
+	http.ListenAndServe("localhost:8080", nil)
 }
