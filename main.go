@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -11,11 +10,13 @@ import (
 type Numbers struct {
 	Values []float64 `json:"values"` // Свзяь с JSON
 }
+type SumResponse struct {
+	Sum float64 `json:"sum"`
+}
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost { //Поверка на метод запроса (используется только POST запрос)
-		http.Error(w, "Only POST method is supported", http.StatusBadRequest)
-		//fmt.Fprintln(w, "Only POST method is supported")
+		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed) // 405
 		return
 	}
 
@@ -29,7 +30,14 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	for _, v := range nums.Values {
 		sum += v
 	}
-	fmt.Fprintln(w, sum)
+	resp := SumResponse{Sum: sum}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil { //ошибка при декодировании
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
