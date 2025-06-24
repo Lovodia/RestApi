@@ -14,13 +14,14 @@ type Numbers struct {
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost { //Поверка на метод запроса (используется только POST запрос)
-		fmt.Fprintln(w, "Поддерживается только метод POST")
+		http.Error(w, "Only POST method is supported", http.StatusBadRequest)
+		//fmt.Fprintln(w, "Only POST method is supported")
 		return
 	}
 
 	var nums Numbers
 	if err := json.NewDecoder(r.Body).Decode(&nums); err != nil { // Декодеривание JSON
-		http.Error(w, "Неверный формат данных", http.StatusBadRequest) //Ошибка при декодировании
+		http.Error(w, "invalid data format", http.StatusBadRequest) //Ошибка при декодировании
 		return
 	}
 
@@ -28,8 +29,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	for _, v := range nums.Values {
 		sum += v
 	}
-
-	fmt.Fprintf(w, "Сумма: %v\n", sum)
+	fmt.Fprintln(w, sum)
 }
 
 func main() {
