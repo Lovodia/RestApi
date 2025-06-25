@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/Lovodia/RestApi/internal/models"
-	"github.com/Lovodia/RestApi/internal/sum"
+	"github.com/Lovodia/-REST-API/internal/models"
+	"github.com/Lovodia/-REST-API/internal/sum"
 
 	"github.com/labstack/echo/v4"
 )

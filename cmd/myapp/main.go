@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/Lovodia/RestApi/internal/handlers"
+	"github.com/Lovodia/-REST-API/internal/handlers"
 )
 
 func main() {
