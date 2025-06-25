@@ -1,4 +1,4 @@
-module maingithub.com/Lovodia/RestApi
+module github.com/Lovodia/RestApi
 
 go 1.24.1
 
