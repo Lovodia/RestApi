@@ -1,9 +1,10 @@
 package main
 
 import (
-	"encoding/json"
-	"log/slog"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Numbers struct {
@@ -14,28 +15,10 @@ type SumResponse struct {
 	Sum float64 `json:"sum"`
 }
 
-//ФОРМАТ ВВОДА {"values": [1, 4, 3, 6]}
-
-func PostHandler(w http.ResponseWriter, r *http.Request) {
-	logger := slog.Default()
-
-	if r.Method != http.MethodPost {
-		logger.Warn("Unsupported HTTP method",
-			"method", r.Method,
-			"remote_addr", r.RemoteAddr,
-		)
-		http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
-		return
-	}
-
+func PostHandler(c echo.Context) error {
 	var nums Numbers
-	if err := json.NewDecoder(r.Body).Decode(&nums); err != nil {
-		logger.Warn("JSON decode error",
-			"error", err,
-			"remote_addr", r.RemoteAddr,
-		)
-		http.Error(w, "Invalid data format", http.StatusBadRequest)
-		return
+	if err := c.Bind(&nums); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid data format")
 	}
 
 	sum := 0.0
@@ -43,19 +26,14 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		sum += v
 	}
 
-	logger.Info("Sum calculated",
-		"values", nums.Values,
-		"sum", sum,
-		"remote_addr", r.RemoteAddr,
-	)
-
 	resp := SumResponse{Sum: sum}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	return c.JSON(http.StatusOK, resp)
 }
 
 func main() {
-	http.HandleFunc("/post", PostHandler)
-	slog.Info("Server started on localhost:8080")
-	http.ListenAndServe("localhost:8080", nil)
+	e := echo.New()
+	e.Use(middleware.Logger())
+
+	e.POST("/post", PostHandler)
+	e.Logger.Fatal(e.Start(":8080"))
 }
