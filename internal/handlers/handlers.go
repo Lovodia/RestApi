@@ -15,11 +15,7 @@ func PostHandler(logger *slog.Logger) echo.HandlerFunc {
 		var nums models.Numbers
 		if err := c.Bind(&nums); err != nil {
 
-			if err != nil {
-				logger.Error("Failed to bind request body", "error", err.Error())
-			} else {
-				logger.Error("Failed to bind request body: unknown error")
-			}
+			logger.Error("Failed to bind request body", "error", err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid data format")
 		}
 
