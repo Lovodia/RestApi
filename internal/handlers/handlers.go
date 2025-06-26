@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"log/slog"
+	"net/http"
 
 	"github.com/Lovodia/-REST-API/internal/models"
 	"github.com/Lovodia/-REST-API/internal/usecase"
@@ -15,11 +14,20 @@ func PostHandler(logger *slog.Logger) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var nums models.Numbers
 		if err := c.Bind(&nums); err != nil {
-			logger.Error("Failed to bind request body", "error", err)
+
+			if err != nil {
+				logger.Error("Failed to bind request body", "error", err.Error())
+			} else {
+				logger.Error("Failed to bind request body: unknown error")
+			}
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid data format")
 		}
 
-		logger.Info("Received numbers", "values", nums.Values)
+		if nums.Values == nil {
+			logger.Info("Received numbers", "values", "nil slice")
+		} else {
+			logger.Info("Received numbers", "values", nums.Values)
+		}
 
 		total := usecase.CalculateSum(nums.Values)
 

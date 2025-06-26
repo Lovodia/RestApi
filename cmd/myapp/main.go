@@ -14,7 +14,7 @@ import (
 func main() {
 	cfg := config.LoadConfig()
 
-	logger := slog.New(slog.NewTextHandler(log.Writer()))
+	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
 
 	e := echo.New()
 

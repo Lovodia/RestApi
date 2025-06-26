@@ -1,4 +1,4 @@
-package sum
+package usecase
 
 func CalculateSum(values []float64) (sum float64) {
 	for _, v := range values {
