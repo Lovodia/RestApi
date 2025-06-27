@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -9,16 +9,22 @@ import (
 
 	"github.com/Lovodia/restapi/internal/handlers"
 	"github.com/Lovodia/restapi/pkg/config"
-	loggerSwitch "github.com/Lovodia/restapi/pkg/logger" // импортируем новый пакет
+	loggerSwitch "github.com/Lovodia/restapi/pkg/logger"
 )
 
 func main() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})))
+
 	cfg, err := config.LoadConfig("config.yaml")
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
 	logger := loggerSwitch.NewLogger(cfg.Logger.Level)
+	slog.SetDefault(logger)
 
 	e := echo.New()
 	e.Logger.SetOutput(os.Stdout)
