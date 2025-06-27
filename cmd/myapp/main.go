@@ -3,21 +3,42 @@ package main
 import (
 	"log"
 	"log/slog"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/Lovodia/-REST-API/internal/handlers"
-	"github.com/Lovodia/-REST-API/pkg/config"
+	"github.com/Lovodia/restapi/internal/handlers"
+	"github.com/Lovodia/restapi/pkg/config"
 )
 
 func main() {
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
 
-	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
+	// Инициализация логгера с указанным уровнем
+	var logLevel slog.Level
+	switch cfg.Logger.Level {
+	case "debug":
+		logLevel = slog.LevelDebug
+	case "info":
+		logLevel = slog.LevelInfo
+	case "warn":
+		logLevel = slog.LevelWarn
+	case "error":
+		logLevel = slog.LevelError
+	default:
+		logLevel = slog.LevelInfo
+	}
+
+	opts := &slog.HandlerOptions{
+		Level: logLevel,
+	}
+	logger := slog.New(slog.NewTextHandler(os.Stderr, opts))
 
 	e := echo.New()
-
 	e.Logger.SetOutput(nil)
 
 	e.Use(middleware.RequestID())
@@ -25,10 +46,5 @@ func main() {
 
 	e.POST("/calculate-sum", handlers.PostHandler(logger))
 
-	port := cfg.ServerPort
-	if port == "" {
-		port = "8080"
-	}
-
-	e.Logger.Fatal(e.Start(":" + port))
+	e.Logger.Fatal(e.Start(":" + cfg.Server.Port))
 }
