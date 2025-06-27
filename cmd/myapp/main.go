@@ -39,7 +39,7 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, opts))
 
 	e := echo.New()
-	e.Logger.SetOutput(nil)
+	e.Logger.SetOutput(os.Stdout)
 
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())

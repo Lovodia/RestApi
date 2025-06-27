@@ -1,4 +1,4 @@
-package logger
+package loggers
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 )
 
 // safeLogError логирует ошибку с защитой от паники
-func safeLogError(logger *slog.Logger, msg string, err error) {
+func SafeLogError(logger *slog.Logger, msg string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Recovered from panic in slog logging: %v", r)
@@ -21,7 +21,7 @@ func safeLogError(logger *slog.Logger, msg string, err error) {
 }
 
 // safeLogInfo логирует информационное сообщение с защитой от паники
-func safeLogInfo(logger *slog.Logger, msg string, args ...any) {
+func SafeLogInfo(logger *slog.Logger, msg string, args ...any) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Recovered from panic in slog info logging: %v", r)
