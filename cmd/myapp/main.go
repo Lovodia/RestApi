@@ -9,7 +9,7 @@ import (
 
 	"github.com/Lovodia/restapi/internal/handlers"
 	"github.com/Lovodia/restapi/pkg/config"
-	"github.com/Lovodia/restapi/pkg/logger1" // импортируем новый пакет
+	loggerSwitch "github.com/Lovodia/restapi/pkg/logger" // импортируем новый пакет
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	logger := logger1.NewLogger(cfg.Logger.Level)
+	logger := loggerSwitch.NewLogger(cfg.Logger.Level)
 
 	e := echo.New()
 	e.Logger.SetOutput(os.Stdout)

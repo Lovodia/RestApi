@@ -1,4 +1,4 @@
-package logger1
+package loggerSwitch
 
 import (
 	"log/slog"
