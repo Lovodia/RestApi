@@ -3,6 +3,7 @@ module github.com/Lovodia/restapi
 go 1.24.1
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0
 	github.com/labstack/echo/v4 v4.13.4
 	gopkg.in/yaml.v3 v3.0.1
 )

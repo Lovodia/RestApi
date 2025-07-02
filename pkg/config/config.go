@@ -3,15 +3,16 @@ package config
 import (
 	"os"
 
+	"github.com/caarlos0/env/v9"
 	"gopkg.in/yaml.v3"
 )
 
 type ServerConfig struct {
-	Port string `yaml:"port" env:"SERVER_PORT"`
+	Port string `env:"SERVER_PORT" envDefault:"8080"`
 }
 
 type LoggerConfig struct {
-	Level string `yaml:"level" env:"LOGGER_LEVEL"`
+	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 }
 
 type Config struct {
@@ -30,19 +31,8 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	// Переопределяем параметры из переменных окружения, если они указаны
-	if port := os.Getenv("SERVER_PORT"); port != "" {
-		cfg.Server.Port = port
-	}
-	if level := os.Getenv("LOGGER_LEVEL"); level != "" {
-		cfg.Logger.Level = level
-	}
-
-	if cfg.Server.Port == "" {
-		cfg.Server.Port = "8080"
-	}
-	if cfg.Logger.Level == "" {
-		cfg.Logger.Level = "info"
+	if err := env.Parse(&cfg); err != nil {
+		return nil, err
 	}
 
 	return &cfg, nil
