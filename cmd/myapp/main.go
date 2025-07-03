@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,7 +20,6 @@ import (
 func main() {
 	cfg, err := config.LoadConfig("config.yaml")
 	if err != nil {
-
 		tempLogger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 			Level: slog.LevelInfo,
 		}))
@@ -33,5 +37,24 @@ func main() {
 
 	e.POST("/calculate-sum", handlers.PostHandler(logger))
 
-	e.Logger.Fatal(e.Start(":" + cfg.Server.Port))
+	go func() {
+		if err := e.Start(":" + cfg.Server.Port); err != nil && err != http.ErrServerClosed {
+			logger.Error("shutting down the server due to error", "error", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	sig := <-quit
+	logger.Info("shutdown signal received", "signal", sig.String())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := e.Shutdown(ctx); err != nil {
+		logger.Error("error during server shutdown", "error", err)
+	} else {
+		logger.Info("server shutdown completed gracefully")
+	}
 }
