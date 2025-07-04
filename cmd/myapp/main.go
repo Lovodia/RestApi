@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/Lovodia/restapi/internal/handlers"
+	"github.com/Lovodia/restapi/internal/storage"
 	"github.com/Lovodia/restapi/pkg/config"
 	loggerSwitch "github.com/Lovodia/restapi/pkg/logger"
 )
@@ -28,14 +29,14 @@ func main() {
 	}
 
 	logger := loggerSwitch.NewLogger(cfg.Logger.Level)
-
+	store := storage.NewResultStore()
 	e := echo.New()
-	e.Logger.SetOutput(os.Stdout)
 
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 
-	e.POST("/calculate-sum", handlers.PostHandler(logger))
+	e.POST("/calculate-sum", handlers.PostHandler(logger, store))
+	e.GET("/results", handlers.GetAllResultsHandler(logger, store))
 
 	go func() {
 		if err := e.Start(":" + cfg.Server.Port); err != nil && err != http.ErrServerClosed {

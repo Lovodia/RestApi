@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-// NewLogger создаёт новый slog.Logger с уровнем, заданным строкой levelStr
 func NewLogger(levelStr string) *slog.Logger {
 	var logLevel slog.Level
 	switch levelStr {
