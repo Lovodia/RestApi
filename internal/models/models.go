@@ -7,3 +7,7 @@ type Numbers struct {
 type SumResponse struct {
 	Sum float64 `json:"sum"`
 }
+
+type MultiplyResponse struct {
+	Multiply float64 `json:"multiply"`
+}

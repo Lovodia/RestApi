@@ -36,6 +36,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.POST("/calculate-sum", handlers.PostHandler(logger, store))
+	e.POST("/calculate-multiply", handlers.MultiplyHandler(logger, store))
 	e.GET("/results", handlers.GetAllResultsHandler(logger, store))
 
 	go func() {

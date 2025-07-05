@@ -38,6 +38,31 @@ func PostHandler(logger *slog.Logger, store *storage.ResultStore) echo.HandlerFu
 		return c.JSON(http.StatusOK, resp)
 	}
 }
+func MultiplyHandler(logger *slog.Logger, store *storage.ResultStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req models.Numbers
+		if err := c.Bind(&req); err != nil {
+			logger.Error("Failed to bind multiply request", "error", err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid data format")
+		}
+		if req.Values == nil {
+			logger.Info("Received numbers", "values", "nil slice")
+		} else {
+			logger.Info("Received numbers", "values", req.Values)
+		}
+
+		multiply := usecase.CalculatedMultiply(req.Values)
+
+		logger.Info("Calculated multiply", "multiply", multiply)
+		resp := models.MultiplyResponse{Multiply: multiply}
+
+		key := strconv.FormatInt(time.Now().UnixNano(), 10)
+		store.Save(key, multiply)
+
+		return c.JSON(http.StatusOK, resp)
+	}
+}
+
 func GetAllResultsHandler(logger *slog.Logger, store *storage.ResultStore) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		results := store.GetAll()
